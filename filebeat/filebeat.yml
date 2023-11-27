@@ -1,0 +1,42 @@
+filebeat.inputs:
+- type: azure-blob-storage
+  id: azure-blob-storage-stream
+  enabled: true
+  account_name: __your_storage_account_name__
+  auth.shared_credentials.account_key: __your_access_key__
+  fields_under_root: true
+  containers:
+  - name: __your_storage_container_name__
+    max_workers: 2
+    poll: true
+    poll_interval: 10s
+  json.keys_under_root: true
+  json.overwrite_keys: true
+  json.add_error_key: true
+
+# filebeat.inputs:
+#- type: filestream
+#  id: my-filestream-id
+#  paths:
+#    - /var/log/messages
+#    - /var/log/*.log
+
+setup.template.name: "logs"
+setup.template.pattern: "logs"
+setup.dashboards.enabled: false
+
+setup.kibana:
+  host: http://kibana:5601
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "logs"
+
+processors:
+  - decode_json_fields:
+      fields: ["message"]
+      process_array: false
+      max_depth: 4
+      target: ""
+      overwrite_keys: false
+      add_error_key: true
